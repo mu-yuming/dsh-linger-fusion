@@ -11,6 +11,7 @@
 - [07 Strata本地部署分析](07-Strata本地部署分析与推荐.md) — 调研过程（推荐已被 08 推翻）
 - [08 PolyStrata收益评估](08-PolyStrata收益评估.md) — 同尺度实测：本机 llama.cpp 更快，**不建议部署**
 - [09 A/B质量验证与成本阈值](09-AB质量验证与成本阈值.md) — **简报不损质量，但<1500token是负收益**（关键修正）
+- [10 收尾核查结果](10-收尾核查结果.md) — OT网关只读边界实测通过 + Codex CLI 缺口已补（可用 deepseek-flash）
 - [DSH Skill](skill/local-first-routing.SKILL.md) — 已安装为 `local-first-routing`，会话内可直接调用（含阈值规则与全部命令）
 
 - **[00 最终总览](00-最终总览.md)** — 读这一份就懂全局，01–06 的串讲与索引
