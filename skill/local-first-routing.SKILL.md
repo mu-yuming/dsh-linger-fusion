@@ -1,8 +1,3 @@
----
-name: local-first-routing
-description: "用本地大模型先压缩长材料再派发在线模型，节省在线 token。当用户给出长日志/文档/报告需要分析总结，或明确提到省 token、省钱、本地优先时使用。"
----
-
 # 本地优先省钱流水线
 
 把长任务交给本地免费模型先压缩，再派给在线模型只做核心判断，降低在线 token 消耗。
@@ -49,6 +44,14 @@ python C:/AI/github-sync/doubao/doubao_assist.py classify <文件或文本>
 ```
 python C:/AI/github-sync/workgroup/workgroup.py <任务文件> <auto|local|doubao|expert|codex>
 ```
+codex 模式已接真实 Codex CLI：先本地简报 → 写 .codex.log → 调用 codex.exe（danger-full-access）。
+
+### 5. 直接调 Codex 做编码
+```
+C:/AI/tools/codex-cli/bin/codex.exe exec --skip-git-repo-check --sandbox danger-full-access "<任务描述>"
+```
+实测能写脚本并自行验证（例：生成 alarm_stats.py，自跑输出「低温预警: 3 / 高温预警: 3」）。
+注意：每次约 10-13K token，含系统提示。
 
 ## 模型角色与成本
 
@@ -57,7 +60,7 @@ python C:/AI/github-sync/workgroup/workgroup.py <任务文件> <auto|local|douba
 | 本地 Qwen3 35B | llama.cpp @127.0.0.1:11434 | 免费 | 简报、初筛、汇总 |
 | 免费强模型 | magpie 网关 @127.0.0.1:3425，`opencode-zen-free/hy4-flash-free` | 免费 | 深度推理（需 reasoning_effort=none 才输出干净） |
 | 豆包 | 火山方舟 API，`doubao-seed-2-1-turbo-260628` | 低 | 摘要/分类（需 thinking disabled） |
-| Codex | `~/.codex/config.toml` 已配 deepseek-flash | 低 | 编码（CLI 未入 PATH） |
+| Codex | `C:/AI/tools/codex-cli/bin/codex.exe`，复用 `~/.codex/config.toml`（deepseek/deepseek-flash） | 低 | 编码（**必须 danger-full-access**，见坑7） |
 
 ## 前置条件（缺失会失败）
 - llama.cpp 在 127.0.0.1:11434 运行（`curl 127.0.0.1:11434/v1/models` 应返回模型列表）
@@ -71,6 +74,12 @@ python C:/AI/github-sync/workgroup/workgroup.py <任务文件> <auto|local|douba
 4. **豆包需 `thinking: {type: disabled}`** 才快且省。
 5. **Windows 中文乱码**——脚本已 `sys.stdout.reconfigure(encoding='utf-8')`，自己写脚本时记得加。
 6. **别让豆包做 subagent**——实测 6 次派发 5 次完成失败（reasoning_content 字段与 DSH 不兼容），只走 API 直连。
+7. **Codex 在 Windows 必须 `--sandbox danger-full-access`**——`read-only` 和 `workspace-write` 都会卡死无输出。
+   根因：Codex 官方 issue #48593/#50699/#34842，Windows 上写权限 ACE 授予会 stall（与 DSH 自身 ACL 问题同源）。
+   正确命令：`C:/AI/tools/codex-cli/bin/codex.exe exec --skip-git-repo-check --sandbox danger-full-access "<任务>"`
+   代价：失去沙箱隔离，只在受信目录 + Git 版本控制下使用。
+8. **用 Python subprocess 调 codex 不能用 `capture_output=True`**——codex 进度输出量大，管道缓冲会死锁，表现为 900s 超时但文件其实已写好。
+   正确做法：`subprocess.run(cmd, stdout=logfile, stderr=subprocess.STDOUT, timeout=900)`，把输出重定向到文件后再读。
 
 ## 质量保障
 实测证明简报不损质量（细节/数字/因果三类任务均不输原文直给），前提是简报模板强制保留【关键数据】段。
