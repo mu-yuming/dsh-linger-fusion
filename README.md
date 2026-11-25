@@ -23,4 +23,6 @@
 
 - [04 分层任务路由省钱方案](04-分层任务路由省钱方案.md) — 本地前处理+在线派发，实测省66%在线token + [pipeline.py](routing-pipeline/pipeline.py)
 
+- [05 工作群融合分析](05-工作群融合分析.md) — Codex已就绪+四方角色+群规 + [workgroup.py](workgroup/workgroup.py) 工作小组原型
+
 > 注：本文为技术评估记录，涉及的环境路径已做泛化处理。所有结论基于本会话实测与公开文档核查。
