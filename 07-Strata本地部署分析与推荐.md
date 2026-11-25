@@ -1,5 +1,9 @@
 # Strata / PolyStrata 本地部署分析与推荐
 
+> ⚠️ **本文推荐已被 08 号文档推翻（2026-11-25 追加）**：本文推荐基于「PolyStrata prefill 755–821 比本机快」的假设，
+> 但本机实测 prefill 为 892–958 tok/s，**更快**。请以 [08-PolyStrata收益评估](08-PolyStrata收益评估.md) 的结论为准：不建议部署。
+> 本文保留作为研究与决策过程记录。
+
 ## 一、先厘清：两个项目，别搞混
 - **Niko1221/Strata**：底层推理引擎（C++ / HIP / Vulkan），MoE 专家卸载。最新 v0.2.21（2026-11-24）。
 - **vecszn/polystrata → simplexai-labs/PolyStrata**：建立在 Strata 之上的产品化封装（MIT），一键安装、本地 OpenAI/Anthropic API。最新 v0.2.20-poly.4-hotfix（2026-11-24），有 Windows x64 安装包。
