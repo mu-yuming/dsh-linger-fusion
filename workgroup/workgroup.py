@@ -53,9 +53,28 @@ def main():
         r = subprocess.run([sys.executable, str(AUTO_ROUTE), str(task)], capture_output=True, text=True, encoding='utf-8')
         print(r.stdout)
     elif mode == 'codex':
-        print('[编码bot] Codex 已通过 magpie 网关接 deepseek/deepseek-flash。')
-        print('   真实编码任务应在 Codex CLI 中执行（~/.codex/config.toml 已配好）。')
-        print('   本脚本不直接驱动 Codex CLI；群内编码任务请@它并附简报文件路径。')
+        codex_exe = Path('C:/AI/tools/codex-cli/bin/codex.exe')
+        if not codex_exe.exists():
+            print('[编码bot] 未找到 codex.exe（C:/AI/tools/codex-cli/bin/）。')
+            raise SystemExit(1)
+        # 先用本地模型做简报，减少 codex 的输入 token
+        text = task.read_text(encoding='utf-8')
+        print('[编码bot] 先本地简报（省 token）...')
+        pipe = AUTO_ROUTE.parent / 'pipeline.py'
+        r = subprocess.run([sys.executable, str(pipe), 'prepare', str(task)],
+                          capture_output=True, text=True, encoding='utf-8')
+        brief_path = task.with_suffix('.brief.md')
+        if brief_path.exists():
+            text = brief_path.read_text(encoding='utf-8')
+            print(f'   使用简报（{len(text)} 字符）')
+        # Windows 上 codex 沙箱会卡死，必须 danger-full-access（见 10-收尾核查结果.md）
+        print('[编码bot] 调用 Codex CLI（deepseek-flash）...')
+        cmd = [str(codex_exe), 'exec', '--skip-git-repo-check', '--sandbox', 'danger-full-access', text]
+        cr = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=900)
+        out = (cr.stdout or '').strip()
+        print(out[-3000:] if out else '[无输出]')
+        if cr.returncode != 0:
+            print(f'[codex 退出码 {cr.returncode}] {(cr.stderr or "")[:300]}')
 
 if __name__ == '__main__':
     main()
