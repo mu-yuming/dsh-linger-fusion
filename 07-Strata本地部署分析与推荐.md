@@ -73,3 +73,21 @@
 - docs/STRIX_HALO_WINDOWS.md：0.2.7 + Qwen3.8-Flash-Next IQ3_S 在 Ryzen AI Max+ 395 / 128GB / Windows 11 实测
 - docs/STRIX_HALO.md、docs/AMD_HIP.md：gfx1151 Windows 支持与 HIP 包
 - 本机实测：GPU=Radeon 8060S gfx1151、RAM=63.6G可见、llama.cpp qwen3-35b-a3b 67 tok/s
+
+## 九、本机前置检查实测（2026-11-25，全部通过）
+| 条件 | 实测 | 结论 |
+|---|---|---|
+| BIOS 64G carve-out | 用户确认已设；Windows 可见内存 63.6G（128−64≈64，互相印证） | 满足 |
+| 磁盘空间 | C 盘空 405G / D 盘空 199G（需 70–120G） | 满足（建议装 C 盘） |
+| AMD 驱动 | 32.0.32029.2010（官方实测 32.0.32015，本机更新） | 满足 |
+| WSL | 存在但 PolyStrata 原生 Windows 不走 WSL，不启动即可 | 无妨 |
+| 现有 llama.cpp | 11434 端口正常，qwen3-35b 在跑 | 并存注意端口区分 |
+
+**结论升级**：所有硬件前置条件均满足，推荐从「先验证」升级为「具备部署条件」。
+唯一仍需用户拍板的是下载约 70–120GB 模型 + 安装 experimental 软件的时间/带宽成本。
+
+## 十、端口与共存建议
+- llama.cpp 保持 11434（auto_route.py 当前指向它）。
+- PolyStrata 用其默认端口（本地 OpenAI/Anthropic API），两者不同端口即可并存。
+- 迁移策略：先让 auto_route.py 指向 PolyStrata 跑 A/B 对比，确认长文前处理更快更准后再切换。
+- 内存：两者都吃统一内存，避免同时满载；日常可只开一个。
