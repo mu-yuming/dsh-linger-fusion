@@ -70,11 +70,21 @@ def main():
         # Windows 上 codex 沙箱会卡死，必须 danger-full-access（见 10-收尾核查结果.md）
         print('[编码bot] 调用 Codex CLI（deepseek-flash）...')
         cmd = [str(codex_exe), 'exec', '--skip-git-repo-check', '--sandbox', 'danger-full-access', text]
-        cr = subprocess.run(cmd, capture_output=True, text=True, encoding='utf-8', errors='replace', timeout=900)
-        out = (cr.stdout or '').strip()
-        print(out[-3000:] if out else '[无输出]')
-        if cr.returncode != 0:
-            print(f'[codex 退出码 {cr.returncode}] {(cr.stderr or "")[:300]}')
+        # 坑：codex 进度输出多，capture_output 管道缓冲会卡死；改为写日志文件
+        log_path = task.with_suffix('.codex.log')
+        try:
+            with open(log_path, 'w', encoding='utf-8', errors='replace') as lf:
+                cr = subprocess.run(cmd, stdout=lf, stderr=subprocess.STDOUT, timeout=900)
+                rc = cr.returncode
+        except subprocess.TimeoutExpired:
+            print(f'[编码bot] 超时（900s），见日志 {log_path}')
+            rc = -1
+        log_text = log_path.read_text(encoding='utf-8', errors='replace') if log_path.exists() else ''
+        tail = log_text[-2500:].strip()
+        print(tail if tail else '[无输出，见日志]')
+        print(f'[完整日志] {log_path}')
+        if rc != 0:
+            print(f'[codex 退出码 {rc}]')
 
 if __name__ == '__main__':
     main()
