@@ -21,4 +21,6 @@
 - [03 改造清单与回滚预案](03-改造清单与回滚预案.md) — 三步路径逐项状态、工业插件改造清单、风险排查、配置回滚点
 - [豆包轻量协同](doubao/豆包Provider配置骨架.md) — 最终定位 API 直连 + [doubao_assist.py](doubao/doubao_assist.py) 摘要/分类脚本
 
+- [04 分层任务路由省钱方案](04-分层任务路由省钱方案.md) — 本地前处理+在线派发，实测省66%在线token + [pipeline.py](routing-pipeline/pipeline.py)
+
 > 注：本文为技术评估记录，涉及的环境路径已做泛化处理。所有结论基于本会话实测与公开文档核查。
