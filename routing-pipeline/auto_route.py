@@ -92,10 +92,17 @@ if __name__ == '__main__':
     if len(sys.argv)<2 or not Path(sys.argv[1]).exists(): raise SystemExit('用法: auto_route.py <任务文件>')
     text = Path(sys.argv[1]).read_text(encoding='utf-8')
     orig = approx(text)
-    print('① 本地前处理中（免费）...')
-    brief = make_brief(text)
-    bt = approx(brief)
-    target = decide(brief)
+    SKIP_THRESHOLD = 1500  # 实测盈亏平衡点：低于此值做简报是负收益
+    if orig < SKIP_THRESHOLD:
+        print(f'① 原文仅 {orig} token < {SKIP_THRESHOLD}，跳过简报（实测做简报负收益）')
+        brief = text
+        bt = orig
+        target = decide(text)
+    else:
+        print('① 本地前处理中（免费）...')
+        brief = make_brief(text)
+        bt = approx(brief)
+        target = decide(brief)
     print(f'   简报 {bt} token（原文 {orig}，省 {100*(1-bt/orig):.0f}%）| 派发判断: {target}')
     print('② 自动派发到在线模型...')
     who, result = dispatch(brief, target)
